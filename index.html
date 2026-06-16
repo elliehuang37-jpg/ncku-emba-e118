@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成大EMBA E118 選課器｜115學年度第1學期</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cacao:    #4A2F2B;
+  --rose:     #B76E79;
+  --gold:     #C9A05C;
+  --petal:    #F6ECEC;
+  --white:    #FFFFFF;
+  --ink:      #3A2E2B;
+  --divider:  #E3D5D3;
+  --bg:       #F5EEEC;
+  --shadow:   0 1px 6px rgba(74,47,43,.08);
+  --r:        8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.site-header {
+  background: #9B1B2A;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(100,10,20,.35);
+}
+.brand-bar {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px 12px 28px;
+}
+.logo-block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.logo-text .lt-main {
+  font-size: 32px;
+  font-weight: 900;
+  color: #FFFFFF;
+  letter-spacing: .12em;
+  line-height: 1.1;
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+}
+.logo-text .lt-sub {
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(255,255,255,.92);
+  letter-spacing: .22em;
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+}
+.toolbar {
+  background: rgba(0,0,0,.22);
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+.toolbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 28px;
+}
+.toolbar-left { display: flex; flex-direction: column; gap: 1px; }
+.toolbar-left .tl-main {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,.82);
+  letter-spacing: .08em;
+}
+.toolbar-left .tl-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,.45);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.hb-pill {
+  background: var(--gold);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+/* ── LAYOUT ── */
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+}
+
+/* ── ADVICE BOX ── */
+.advice-card {
+  background: var(--white);
+  border: 1px solid var(--divider);
+  border-left: 4px solid var(--gold);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ink);
+}
+.advice-card .adv-mark { color: var(--cacao); font-weight: 700; }
+.advice-card .adv-em { font-weight: 700; color: var(--rose); text-decoration: underline; text-underline-offset: 3px; }
+.advice-card .adv-ul { text-decoration: underline; text-underline-offset: 3px; color: var(--cacao); }
+
+/* ── SECTION LABEL ── */
+.sec-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sec-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--divider);
+}
+
+/* ── WARN ── */
+.warn-box {
+  background: #FFF2F2;
+  border: 1px solid #F0CACA;
+  border-left: 3px solid #C05050;
+  border-radius: var(--r);
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #7A2828;
+  margin-bottom: 16px;
+  display: none;
+  line-height: 1.7;
+}
+
+/* ── COURSE GRID ── */
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.cc {
+  background: var(--white);
+  border: 1.5px solid var(--divider);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+  box-shadow: var(--shadow);
+}
+.cc:hover { border-color: var(--rose); box-shadow: 0 2px 10px rgba(183,110,121,.15); }
+.cc.sel  { border-color: var(--gold); background: #FDF8F0; box-shadow: 0 2px 10px rgba(201,160,92,.18); }
+.cc.rsel { border-color: var(--rose); background: var(--petal); box-shadow: 0 2px 10px rgba(183,110,121,.18); }
+.cc.base-sel { border-color: #8DA878; background: #F4F8F2; }
+.ctop { display: flex; align-items: flex-start; gap: 10px; }
+.cb {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #C8B4B0;
+  flex-shrink: 0; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--white);
+  transition: background .15s, border-color .15s;
+}
+.cb.ck  { background: var(--gold);  border-color: var(--gold); }
+.cb.ckr { background: var(--rose);  border-color: var(--rose); }
+.cb.ckb { background: #7E9E6E; border-color: #7E9E6E; }
+.cb svg { width: 10px; height: 10px; }
+.cn {
+  font-size: 14px; font-weight: 700; color: var(--cacao); line-height: 1.45;
+}
+.cmeta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.bd {
+  font-size: 11px; padding: 2px 9px; border-radius: 20px;
+  letter-spacing: .04em; font-weight: 500;
+}
+.bd-day  { background: #EEE6FF; color: #5A3FA0; }
+.bd-cr   { background: #FFF3E0; color: #8B5E0A; }
+.bd-core { background: #EBF4FF; color: #2A5FA0; }
+.bd-req  { background: var(--petal); color: var(--rose); }
+.bd-elec { background: #F0F0F0; color: #555; }
+.bd-base { background: #EEF5EA; color: #3D6B2E; }
+.bd-time { background: #FEF0EE; color: #8B2A2A; }
+.bd-room { background: #F5F5F5; color: #666; }
+.cnote { font-size: 11px; color: #9A7B78; margin-top: 7px; line-height: 1.5; }
+.cinfo { margin-top: 9px; display: flex; flex-direction: column; gap: 4px; }
+.ci-row { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--ink); line-height: 1.4; }
+.ci-icon { font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+.ci-val { color: #5A3E3A; }
+
+/* ── SUMMARY BAR ── */
+.sbar {
+  background: var(--cacao);
+  border-radius: var(--r);
+  padding: 18px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 12px rgba(74,47,43,.18);
+}
+.si {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 0 20px;
+  border-right: 1px solid rgba(255,255,255,.15);
+  align-items: center;
+}
+.si:first-child { padding-left: 0; }
+.si:last-child  { border-right: none; flex: 1; align-items: flex-start; }
+.sl { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+.sv { font-size: 26px; font-weight: 700; color: var(--gold); line-height: 1.2; }
+.stm { font-size: 12px; color: rgba(255,255,255,.8); line-height: 1.7; }
+
+/* ── TABS ── */
+.tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.tab {
+  font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  padding: 6px 18px; border-radius: 20px;
+  border: 1.5px solid var(--divider);
+  cursor: pointer; background: var(--white);
+  color: var(--ink); text-transform: uppercase;
+  transition: all .15s;
+}
+.tab:hover { border-color: var(--rose); color: var(--rose); }
+.tab.on { background: var(--cacao); color: var(--white); border-color: var(--cacao); }
+
+/* ── MONTH NAV ── */
+.mnav {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.mnav button {
+  background: var(--white); border: 1px solid var(--divider);
+  color: var(--cacao); font-size: 16px; width: 32px; height: 32px;
+  border-radius: 50%; cursor: pointer; font-weight: 700;
+  transition: background .15s;
+}
+.mnav button:hover { background: var(--petal); border-color: var(--rose); }
+.mlb { font-size: 15px; font-weight: 700; color: var(--cacao); min-width: 120px; text-align: center; }
+
+/* ── CALENDAR ── */
+.cal-wrap { background: var(--white); border: 1px solid var(--divider); border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); }
+.cal { width: 100%; border-collapse: collapse; }
+.cal th {
+  padding: 7px 4px; text-align: center;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(74,47,43,.5); border-bottom: 1px solid var(--divider);
+}
+.cal td {
+  padding: 6px 5px; vertical-align: top;
+  border: 1px solid var(--divider); min-height: 68px; font-size: 12px;
+  width: calc(100% / 7);
+}
+.cal td:first-child { color: #C05050; }
+.cal td:last-child  { color: #4A6098; }
+.cdt { font-size: 11px; color: #9A7B78; margin-bottom: 4px; }
+.cev {
+  border-radius: 4px; padding: 3px 6px;
+  margin-bottom: 3px; font-size: 10px; line-height: 1.45;
+  font-weight: 500;
+}
+.eco  { background: #EBF4FF; color: #1A3F80; }
+.eel  { background: #F5F0FA; color: #5A3080; }
+.ereq { background: var(--petal); color: #8B2A4A; }
+.eba  { background: #EEF5EA; color: #2E6020; }
+
+/* ── LIST VIEW ── */
+.lv { display: flex; flex-direction: column; gap: 8px; }
+.li {
+  background: var(--white); border: 1px solid var(--divider);
+  border-radius: var(--r); padding: 12px 16px;
+  box-shadow: var(--shadow);
+}
+.ld { font-size: 11px; font-weight: 700; color: var(--rose); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3px; }
+.ln { font-size: 14px; font-weight: 700; color: var(--cacao); }
+.ldt { font-size: 12px; color: #7A5C58; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 8px; }
+.ldt span { display: flex; align-items: center; gap: 3px; }
+
+/* ── FOOTER ── */
+.site-footer {
+  background: var(--cacao); color: rgba(255,255,255,.5);
+  text-align: center; padding: 16px; font-size: 12px; letter-spacing: .06em;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  .header-inner { height: auto; flex-wrap: wrap; }
+  .logo-gold { padding: 10px 16px; }
+  .course-grid { grid-template-columns: 1fr; }
+  .sbar { flex-direction: column; gap: 12px; }
+  .si { border-right: none; border-bottom: 1px solid rgba(255,255,255,.15); padding: 8px 0; align-items: flex-start; }
+  .si:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="brand-bar">
+    <div class="logo-block">
+      <div class="logo-text">
+        <div class="lt-main">國立成功大學</div>
+        <div class="lt-sub">EMBA 高階管理碩士在職專班</div>
+      </div>
+    </div>
+    <span class="hb-pill">E118</span>
+  </div>
+  <div class="toolbar">
+    <div class="toolbar-inner">
+      <div class="toolbar-left">
+        <div class="tl-main">115學年度第1學期　選課輔助工具</div>
+        <div class="tl-sub">115th Academic Year · Semester 1 · Course Selector</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="page-wrap">
+
+  <!-- ADVICE -->
+  <div class="advice-card">
+    <span class="adv-mark">■</span>
+    修課建議<span class="adv-em">必修優先於選修</span>，先修習基礎（經會統）、<span class="adv-ul">核心（五管）</span>、必修（CEO、研究方法）、專業必選（3選1）課程後，再修習選修課程（15學分）。
+  </div>
+
+  <!-- WARN -->
+  <div id="warnBox" class="warn-box"></div>
+
+  <!-- COURSES -->
+  <div class="sec-label">課程選擇 COURSE SELECTION</div>
+  <div class="course-grid" id="cgrid"></div>
+
+  <!-- SUMMARY -->
+  <div class="sec-label">選課摘要 SUMMARY</div>
+  <div class="sbar">
+    <div class="si"><div class="sl">已選學分</div><div class="sv" id="sCr">0</div></div>
+    <div class="si"><div class="sl">課程數量</div><div class="sv" id="sCt">0</div></div>
+    <div class="si"><div class="sl">上課天數/週</div><div class="sv" id="sDy">0</div></div>
+    <div class="si">
+      <div class="sl">上課時段 SCHEDULE</div>
+      <div class="stm" id="sTm">— 請選擇課程 —</div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="sec-label">月曆檢視 CALENDAR</div>
+  <div class="tabs">
+    <div class="tab on" id="t1" onclick="sw('cal')">月曆 CALENDAR</div>
+    <div class="tab" id="t2" onclick="sw('lst')">清單 LIST</div>
+  </div>
+  <div class="mnav">
+    <button onclick="pm()" aria-label="上月">&#8249;</button>
+    <span class="mlb" id="mlb"></span>
+    <button onclick="nm()" aria-label="下月">&#8250;</button>
+  </div>
+  <div id="vc" class="cal-wrap"></div>
+  <div id="vl" style="display:none; margin-top:0;"></div>
+
+</div>
+
+<footer class="site-footer">
+  成大EMBA E118 選課輔助工具 · 115學年度第1學期 · 僅供參考，正式選課以教務系統為準
+</footer>
+
+<script>
+const CS = [
+  { id:'301', name:'專題討論', cr:0, day:'—', tc:'蔡佳良', tm:'—', rm:'—', tp:'必修', tk:'req', dt:[], nt:'限已修滿45學分且本學期未修課者' },
+  { id:'302', name:'企業個案與實務', cr:3, day:'一', tc:'黃振皓 + 教師群', tm:'18:30–21:30', rm:'62401講堂', tp:'專業必選', tk:'core', dt:['9/7','9/14','9/21','10/5','10/12','10/19','11/2','11/9','11/16','11/23','11/30','12/7','12/14','12/21','12/28','1/4','1/11'], nt:'10/3（六）補課 09:10–16:00' },
+  { id:'303', name:'策略管理', cr:3, day:'二', tc:'周信輝', tm:'18:30–21:30', rm:'62401講堂', tp:'核心', tk:'core', dt:['9/8','9/15','9/22','9/29','10/6','10/13','10/20','10/27','11/3','11/10','11/17','11/24','12/1','12/8','12/15','12/22','12/29','1/5'] },
+  { id:'304', name:'營運管理', cr:3, day:'三', tc:'謝中奇', tm:'18:30–21:30', rm:'61X02', tp:'核心', tk:'core', dt:['9/9','9/16','9/23','9/30','10/7','10/14','10/21','10/28','11/4','11/11','11/18','11/25','12/2','12/9','12/16','12/23','12/30','1/6'] },
+  { id:'305', name:'財務管理', cr:3, day:'四', tc:'張紹基', tm:'18:30–21:30', rm:'62401講堂', tp:'核心', tk:'core', dt:['9/10','9/17','9/24','10/1','10/8','10/15','10/22','10/29','11/5','11/12','11/19','11/26','12/3','12/10','12/24','12/31'], nt:'12/12（六）補課 09:10–16:00' },
+  { id:'306', name:'行為決策理論', cr:3, day:'五', tc:'張巍勳', tm:'18:30–21:30', rm:'62X01', tp:'選修', tk:'elective', dt:['9/11','9/18','10/2','10/16','10/23','10/30','11/6','11/13','11/20','11/27','12/4','12/11','12/18','1/8'], nt:'10/4（日）及 1/9（六）補課' },
+  { id:'307', name:'CEO高階實務管理(一)', cr:1, day:'六', tc:'蔡佳良 + 教師群', tm:'另行通知', rm:'管院B1演講廳', tp:'必修', tk:'req', dt:['11/21'], nt:'需全程參與 7/25–7/26 新生營，開學後另行補課' },
+  { id:'308', name:'管理經濟專題', cr:3, day:'六', tc:'林軒竹', tm:'09:10–16:00', rm:'61X02', tp:'基礎', tk:'base', dt:['9/12','9/26','10/10','11/7','11/21','12/5','12/19','1/2','1/16'], nt:'單週六上課，限100人' },
+  { id:'309', name:'連鎖品牌經營與企業家健康風險管理', cr:3, day:'六', tc:'王正坤 + 蔡佳良', tm:'09:10–17:00', rm:'62401講堂', tp:'選修', tk:'elective', dt:['9/12','9/26','10/10','11/7','11/21','12/5','12/19','1/2'], nt:'單週六上課，限60人' },
+  { id:'310', name:'運動減壓與健康體適能管理', cr:2, day:'日', tc:'林麗娟 + 教師群', tm:'09:10–13:00', rm:'62401講堂', tp:'選修', tk:'elective', dt:['9/13','9/27','10/11','11/8','11/22','12/6','12/20','1/3','1/17'], nt:'雙週日上課，限50人' },
+  { id:'311', name:'企業研究方法', cr:2, day:'日', tc:'周庭楷', tm:'09:10–13:00', rm:'61X02', tp:'必修（二選一）', tk:'req', dt:['9/13','9/27','10/11','11/8','11/22','12/6','12/20','1/3','1/17'], nt:'雙週日上課，限60人' },
+  { id:'312', name:'商業個案分析與寫作', cr:2, day:'日', tc:'張佑宇 + 張紹基', tm:'14:10–18:00', rm:'62401講堂', tp:'選修', tk:'elective', dt:['9/13','9/27','10/11','11/8','11/22','12/6','12/20','1/3','1/17'], nt:'雙週日上課，限60人' },
+  { id:'313', name:'資訊暨智慧科技與創新及競爭優勢', cr:2, day:'日', tc:'徐立群', tm:'14:10–18:00', rm:'61X02', tp:'選修', tk:'elective', dt:['9/13','9/27','10/11','11/8','11/22','12/6','12/20','1/3','1/17'], nt:'雙週日上課，限60人' },
+  { id:'314', name:'國際實務管理專題(一)', cr:2, day:'—', tc:'蔡佳良', tm:'09:30–16:30', rm:'另見說明', tp:'選修', tk:'elective', dt:['9/6'], nt:'需自費前往英國 8/23–8/29 海外教學' },
+];
+
+const MO = [
+  { y:2025, m:9,  lb:'2025年9月'  },
+  { y:2025, m:10, lb:'2025年10月' },
+  { y:2025, m:11, lb:'2025年11月' },
+  { y:2025, m:12, lb:'2025年12月' },
+  { y:2026, m:1,  lb:'2026年1月'  },
+];
+
+let sel = new Set(), cm = 0;
+
+function ec(k) { return k==='core'?'eco':k==='req'?'ereq':k==='base'?'eba':'eel'; }
+
+function bdClass(k) {
+  if (k==='core')     return 'bd bd-core';
+  if (k==='req')      return 'bd bd-req';
+  if (k==='base')     return 'bd bd-base';
+  return 'bd bd-elec';
+}
+
+function chk(id) {
+  const s = sel.has(id);
+  const c = CS.find(x=>x.id===id);
+  let cl = 'cb';
+  if (s) cl += (c.tk==='req'?'ckr':c.tk==='base'?'ckb':'ck').split('').map((x,i)=>i===0?' '+x:x).join('');
+  return `<div class="${cl}">${s?`<svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>`;
+}
+
+function cbClass(c) {
+  if (!sel.has(c.id)) return 'cb';
+  return 'cb ' + (c.tk==='req'?'ckr':c.tk==='base'?'ckb':'ck');
+}
+
+function cardClass(c) {
+  if (!sel.has(c.id)) return 'cc';
+  return 'cc ' + (c.tk==='req'?'rsel':c.tk==='base'?'base-sel':'sel');
+}
+
+function rCards() {
+  document.getElementById('cgrid').innerHTML = CS.map(c => {
+    const s = sel.has(c.id);
+    const cbCl = cbClass(c);
+    const ccCl = cardClass(c);
+    const chkSvg = s ? `<svg viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : '';
+    return `<div class="${ccCl}" onclick="tog('${c.id}')">
+      <div class="ctop">
+        <div class="${cbCl}">${chkSvg}</div>
+        <div class="cn">${c.name}</div>
+      </div>
+      <div class="cmeta">
+        <span class="bd bd-day">週${c.day}</span>
+        <span class="bd bd-cr">${c.cr} 學分</span>
+        <span class="${bdClass(c.tk)}">${c.tp}</span>
+      </div>
+      <div class="cinfo">
+        <div class="ci-row"><span class="ci-icon">🕐</span><span class="ci-val">${c.tm}</span></div>
+        <div class="ci-row"><span class="ci-icon">👤</span><span class="ci-val">${c.tc}</span></div>
+        <div class="ci-row"><span class="ci-icon">🏛</span><span class="ci-val">${c.rm}</span></div>
+      </div>
+      ${c.nt ? `<div class="cnote">📌 ${c.nt}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function tog(id) {
+  sel.has(id) ? sel.delete(id) : sel.add(id);
+  chkConf(); rCards(); rSum(); rCal(); rLst();
+}
+
+function chkConf() {
+  const w = document.getElementById('warnBox');
+  const issues = [];
+  if (sel.has('308') && sel.has('309')) issues.push('⚠️ 管理經濟專題 ＆ 連鎖品牌經營 均為單週六全天，時間重疊，請擇一修習。');
+  if (sel.has('310') && sel.has('311')) issues.push('⚠️ 運動減壓 ＆ 企業研究方法 同為雙週日 09:10，時間衝突。');
+  if (sel.has('312') && sel.has('313')) issues.push('⚠️ 商業個案分析 ＆ 資訊暨智慧科技 同為雙週日 14:10，時間衝突。');
+  w.innerHTML = issues.join('<br>');
+  w.style.display = issues.length ? 'block' : 'none';
+}
+
+function rSum() {
+  const cs = CS.filter(c => sel.has(c.id));
+  const credits = cs.reduce((s,c) => s + c.cr, 0);
+  const days = new Set(cs.filter(c => c.day !== '—').map(c => c.day));
+  const times = cs.filter(c => c.tm !== '—' && c.tm !== '另行通知').map(c => `週${c.day} ${c.tm}`);
+  document.getElementById('sCr').textContent = credits;
+  document.getElementById('sCt').textContent = cs.length;
+  document.getElementById('sDy').textContent = days.size;
+  document.getElementById('sTm').textContent = times.length ? times.join('　') : '— 請選擇課程 —';
+}
+
+function pd(s) {
+  const m = s.match(/(\d+)\/(\d+)/);
+  if (!m) return null;
+  const mo = parseInt(m[1]);
+  return new Date(mo >= 8 ? 2025 : 2026, mo - 1, parseInt(m[2]));
+}
+
+function rCal() {
+  const mc = MO[cm];
+  const cs = CS.filter(c => sel.has(c.id));
+  const fd = new Date(mc.y, mc.m - 1, 1).getDay();
+  const dm = new Date(mc.y, mc.m, 0).getDate();
+  const em = {};
+  cs.forEach(c => c.dt.forEach(d => {
+    const dt = pd(d);
+    if (!dt || dt.getFullYear() !== mc.y || dt.getMonth() !== mc.m - 1) return;
+    const day = dt.getDate();
+    if (!em[day]) em[day] = [];
+    em[day].push(c);
+  }));
+  let h = `<table class="cal"><thead><tr>`;
+  ['日','一','二','三','四','五','六'].forEach(d => h += `<th>${d}</th>`);
+  h += `</tr></thead><tbody><tr>`;
+  let col = fd;
+  for (let i = 0; i < fd; i++) h += `<td style="background:#FAFAF8"></td>`;
+  for (let d = 1; d <= dm; d++) {
+    h += `<td><div class="cdt">${d}</div>`;
+    (em[d] || []).forEach(c => h += `<div class="cev ${ec(c.tk)}">${c.name.length > 10 ? c.name.slice(0,9)+'…' : c.name}</div>`);
+    h += `</td>`;
+    col = (col + 1) % 7;
+    if (col === 0 && d < dm) h += `</tr><tr>`;
+  }
+  while (col > 0 && col < 7) { h += `<td style="background:#FAFAF8"></td>`; col++; }
+  h += `</tr></tbody></table>`;
+  document.getElementById('vc').innerHTML = h;
+}
+
+function rLst() {
+  const cs = CS.filter(c => sel.has(c.id));
+  if (!cs.length) {
+    document.getElementById('vl').innerHTML = `<div style="color:#9A7B78;font-size:13px;padding:1.5rem;text-align:center">尚未選擇任何課程</div>`;
+    return;
+  }
+  const mc = MO[cm];
+  const evs = [];
+  cs.forEach(c => c.dt.forEach(d => {
+    const dt = pd(d);
+    if (!dt || dt.getFullYear() !== mc.y || dt.getMonth() !== mc.m - 1) return;
+    evs.push({ dt, c });
+  }));
+  evs.sort((a, b) => a.dt - b.dt);
+  const dn = ['日','一','二','三','四','五','六'];
+  let h = `<div class="lv">`;
+  if (!evs.length) h += `<div style="color:#9A7B78;font-size:13px;padding:1.5rem;text-align:center">本月無排課</div>`;
+  evs.forEach(e => {
+    h += `<div class="li">
+      <div class="ld">${mc.y} / ${e.dt.getMonth()+1} / ${e.dt.getDate()}　週${dn[e.dt.getDay()]}</div>
+      <div class="ln">${e.c.name}</div>
+      <div class="ldt">
+        <span>🕐 ${e.c.tm}</span>
+        <span>👤 ${e.c.tc}</span>
+        <span>🏛 ${e.c.rm}</span>
+        <span>📌 ${e.c.tp}　${e.c.cr} 學分</span>
+      </div>
+    </div>`;
+  });
+  h += `</div>`;
+  document.getElementById('vl').innerHTML = h;
+}
+
+function sw(v) {
+  document.getElementById('t1').className = v==='cal' ? 'tab on' : 'tab';
+  document.getElementById('t2').className = v==='lst' ? 'tab on' : 'tab';
+  document.getElementById('vc').style.display = v==='cal' ? '' : 'none';
+  document.getElementById('vl').style.display  = v==='lst' ? '' : 'none';
+}
+
+function pm() { if (cm > 0) { cm--; upd(); } }
+function nm() { if (cm < MO.length-1) { cm++; upd(); } }
+function upd() {
+  document.getElementById('mlb').textContent = MO[cm].lb;
+  rCal(); rLst();
+}
+
+// Init
+document.getElementById('mlb').textContent = MO[cm].lb;
+rCards(); rSum(); rCal(); rLst();
+</script>
+</body>
+</html>
