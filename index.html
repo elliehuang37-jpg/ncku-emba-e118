@@ -468,53 +468,52 @@ function upd(){document.getElementById('mlb').textContent=MO[cm].lb;rCal();rLst(
 // ── Google Calendar 一鍵新增 ────────────────────────────
 function pad2(n){return String(n).padStart(2,'0');}
 
-function gcalDate(dt, hh, mm){
-  // 格式：20250907T183000
-  return dt.getFullYear()+pad2(dt.getMonth()+1)+pad2(dt.getDate())+'T'+pad2(hh)+pad2(mm)+'00';
-}
-
 function makeGcalUrl(c, dt){
   const t = parseTm(c.tm);
+  const d = dt.getFullYear()+pad2(dt.getMonth()+1)+pad2(dt.getDate());
   let dates;
   if(t){
-    dates = gcalDate(dt,t.sh,t.sm) + '/' + gcalDate(dt,t.eh,t.em);
+    // 直接用本地時間數字組成字串，不加 Z（讓 Google Calendar 以台灣時間解讀）
+    const start = d+'T'+pad2(t.sh)+pad2(t.sm)+'00';
+    const end   = d+'T'+pad2(t.eh)+pad2(t.em)+'00';
+    dates = start+'/'+end;
   } else {
-    const ymd = dt.getFullYear()+pad2(dt.getMonth()+1)+pad2(dt.getDate());
-    dates = ymd + '/' + ymd;
+    dates = d+'/'+d;
   }
-  const title    = encodeURIComponent('【成大EMBA E118】'+c.name);
-  const location = encodeURIComponent(c.rm);
-  const details  = encodeURIComponent('授課教師：'+c.tc+'\n課程屬性：'+c.tp+'\n學分：'+c.cr);
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
-    + '&text='    + title
-    + '&dates='   + dates
-    + '&location='+ location
-    + '&details=' + details;
+    +'&text='    +encodeURIComponent('【成大EMBA E118】'+c.name)
+    +'&dates='   +dates
+    +'&location='+encodeURIComponent(c.rm)
+    +'&details=' +encodeURIComponent('授課教師：'+c.tc+'\n課程屬性：'+c.tp+'\n學分：'+c.cr+'\n成大EMBA E118 · 115學年度第1學期');
 }
 
 function rGcal(){
   const cs = CS.filter(c=>sel.has(c.id));
   const box = document.getElementById('gcalBox');
   if(!cs.length){
-    box.innerHTML = '<div class="gcal-empty">請先選擇課程，即可看到 Google Calendar 一鍵新增按鈕</div>';
+    box.innerHTML = '<div style="background:#F5EEEC;border-radius:8px;padding:20px;text-align:center;color:#9A7B78;font-size:13px;">請先勾選上方課程，即可看到各堂課的 Google Calendar 新增按鈕</div>';
     return;
   }
   const dn = ['日','一','二','三','四','五','六'];
   let h = '';
   cs.forEach(c=>{
-    if(!c.dt.length){ return; }
-    h += `<div class="gcal-course-block">
-      <div class="gcal-course-name">📚 ${c.name}</div>
-      <div class="gcal-course-meta">🕐 ${c.tm}　👤 ${c.tc}　🏛 ${c.rm}　${c.tp} · ${c.cr}學分</div>
-      <div class="gcal-dates">`;
+    if(!c.dt.length) return;
+    h += `<div style="background:#fff;border:1px solid #E3D5D3;border-radius:8px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(74,47,43,.07)">
+      <div style="font-size:15px;font-weight:700;color:#4A2F2B;margin-bottom:4px">${c.name}</div>
+      <div style="font-size:12px;color:#7A5C58;margin-bottom:12px;line-height:1.7">
+        時間：${c.tm}　教師：${c.tc}　教室：${c.rm}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">`;
     c.dt.forEach(dStr=>{
       const dt = pd(dStr);
       if(!dt) return;
-      const mo = dt.getMonth()+1;
-      const d  = dt.getDate();
+      const mo  = dt.getMonth()+1;
       const day = dn[dt.getDay()];
       const url = makeGcalUrl(c, dt);
-      h += `<a class="gcal-btn" href="${url}" target="_blank" rel="noopener">📅 ${mo}/${d}（${day}）</a>`;
+      h += `<a href="${url}" target="_blank" rel="noopener"
+        style="display:inline-block;background:#4285F4;color:#fff;font-size:12px;font-weight:700;padding:7px 12px;border-radius:6px;text-decoration:none;letter-spacing:.02em;">
+        + ${mo}/${dt.getDate()}（${day}）
+      </a>`;
     });
     h += `</div></div>`;
   });
