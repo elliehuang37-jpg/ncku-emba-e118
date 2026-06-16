@@ -124,12 +124,13 @@ body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:var(-
 .ln{font-size:14px;font-weight:700;color:var(--cacao)}
 .ldt{font-size:12px;color:#7A5C58;margin-top:5px;display:flex;flex-wrap:wrap;gap:8px}
 
-/* ICS EXPORT BUTTON */
-.export-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap}
-.btn-ics{display:inline-flex;align-items:center;gap:8px;background:var(--cacao);color:var(--white);border:none;border-radius:var(--r);padding:10px 20px;font-size:13px;font-weight:700;letter-spacing:.06em;cursor:pointer;font-family:inherit;transition:background .15s;box-shadow:var(--shadow)}
-.btn-ics:hover{background:#6B4438}
-.btn-ics:disabled{background:#C8B4B0;cursor:not-allowed}
-.ics-note{font-size:12px;color:#9A7B78;line-height:1.6}
+/* GCAL */
+.gcal-course-block{background:var(--white);border:1px solid var(--divider);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.gcal-course-name{font-size:14px;font-weight:700;color:var(--cacao);margin-bottom:6px}
+.gcal-course-meta{font-size:12px;color:#7A5C58;margin-bottom:10px;line-height:1.6}
+.gcal-dates{display:flex;flex-wrap:wrap;gap:6px}
+.gcal-btn{display:inline-flex;align-items:center;gap:4px;background:#4285F4;color:white;font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;text-decoration:none;white-space:nowrap}
+.gcal-empty{color:#9A7B78;font-size:13px;text-align:center;padding:20px}
 
 /* FOOTER */
 .site-footer{background:var(--cacao);color:rgba(255,255,255,.5);text-align:center;padding:16px;font-size:12px;letter-spacing:.06em}
@@ -198,23 +199,11 @@ body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:var(-
     </table>
   </div>
 
-  <!-- 匯出行事曆 -->
-  <div class="sec-label">匯出行事曆 EXPORT TO CALENDAR</div>
-  <div class="export-bar">
-    <button class="btn-ics" id="btnIcs" onclick="exportICS()">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="3" width="14" height="12" rx="2" stroke="white" stroke-width="1.4"/><line x1="5" y1="1" x2="5" y2="5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><line x1="11" y1="1" x2="11" y2="5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><line x1="1" y1="7" x2="15" y2="7" stroke="white" stroke-width="1.2"/><circle cx="5" cy="10" r="1" fill="white"/><circle cx="8" cy="10" r="1" fill="white"/><circle cx="11" cy="10" r="1" fill="white"/></svg>
-      <span class="btn-txt">產生行事曆檔案</span>
-    </button>
-  </div>
-  <div id="icsLinkBox" style="display:none;margin-bottom:28px;">
-    <div style="background:var(--white);border:1px solid var(--divider);border-left:4px solid #2E7D32;border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow);">
-      <div style="font-size:12px;font-weight:700;color:#2E7D32;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">✅ 行事曆檔案已產生</div>
-      <a id="icsLink" href="#" style="display:inline-block;background:#2E7D32;color:white;font-size:14px;font-weight:700;padding:10px 20px;border-radius:var(--r);text-decoration:none;margin-bottom:12px;">⬇️ 點此下載 .ics 檔案</a>
-      <div style="font-size:12px;color:#9A7B78;line-height:1.8;">
-        <b>iPhone</b>：點擊後選「加入行事曆」即完成匯入<br>
-        <b>Android</b>：下載後開啟，選擇以 Google 日曆開啟<br>
-        <b>電腦</b>：下載後雙擊，匯入 Outlook / Google Calendar
-      </div>
+  <!-- 加入 Google Calendar -->
+  <div class="sec-label">加入行事曆 ADD TO GOOGLE CALENDAR</div>
+  <div id="gcalBox">
+    <div style="background:var(--white);border:1px solid var(--divider);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow);color:#9A7B78;font-size:13px;text-align:center;">
+      請先選擇課程，即可看到 Google Calendar 一鍵新增按鈕
     </div>
   </div>
 
@@ -308,7 +297,7 @@ function rCards(){
   }).join('');
 }
 
-function tog(id){ sel.has(id)?sel.delete(id):sel.add(id); chkConf();rCards();rSum();rWeek();rCal();rLst(); }
+function tog(id){ sel.has(id)?sel.delete(id):sel.add(id); chkConf();rCards();rSum();rWeek();rCal();rLst();rGcal(); }
 
 // ── 衝堂檢查 ─────────────────────────────────────────────
 function chkConf(){
@@ -476,86 +465,65 @@ function pm(){if(cm>0){cm--;upd();}}
 function nm(){if(cm<MO.length-1){cm++;upd();}}
 function upd(){document.getElementById('mlb').textContent=MO[cm].lb;rCal();rLst();}
 
-// ── ICS 匯出 ─────────────────────────────────────────────
-function pad(n){return String(n).padStart(2,'0');}
-function toICSDate(date,hh,mm){
-  const y=date.getFullYear();
-  const mo=pad(date.getMonth()+1);
-  const d=pad(date.getDate());
-  return `${y}${mo}${d}T${pad(hh)}${pad(mm)}00`;
+// ── Google Calendar 一鍵新增 ────────────────────────────
+function pad2(n){return String(n).padStart(2,'0');}
+
+function gcalDate(dt, hh, mm){
+  // 格式：20250907T183000
+  return dt.getFullYear()+pad2(dt.getMonth()+1)+pad2(dt.getDate())+'T'+pad2(hh)+pad2(mm)+'00';
 }
-function icsEscape(s){ return s.replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n'); }
-function uid(){ return Math.random().toString(36).slice(2)+Date.now()+'@nckuemba'; }
 
-function exportICS(){
+function makeGcalUrl(c, dt){
+  const t = parseTm(c.tm);
+  let dates;
+  if(t){
+    dates = gcalDate(dt,t.sh,t.sm) + '/' + gcalDate(dt,t.eh,t.em);
+  } else {
+    const ymd = dt.getFullYear()+pad2(dt.getMonth()+1)+pad2(dt.getDate());
+    dates = ymd + '/' + ymd;
+  }
+  const title    = encodeURIComponent('【成大EMBA E118】'+c.name);
+  const location = encodeURIComponent(c.rm);
+  const details  = encodeURIComponent('授課教師：'+c.tc+'\n課程屬性：'+c.tp+'\n學分：'+c.cr);
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text='    + title
+    + '&dates='   + dates
+    + '&location='+ location
+    + '&details=' + details;
+}
+
+function rGcal(){
   const cs = CS.filter(c=>sel.has(c.id));
-  if(!cs.length){ alert('請先選擇課程再產生！'); return; }
-
-  let lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//NCKU EMBA E118//Course Selector//ZH',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'X-WR-CALNAME:成大EMBA E118 課表',
-    'X-WR-TIMEZONE:Asia/Taipei',
-  ];
-
-  const now = new Date();
-  const dtstamp = now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+'T'+pad(now.getHours())+pad(now.getMinutes())+pad(now.getSeconds())+'Z';
-
+  const box = document.getElementById('gcalBox');
+  if(!cs.length){
+    box.innerHTML = '<div class="gcal-empty">請先選擇課程，即可看到 Google Calendar 一鍵新增按鈕</div>';
+    return;
+  }
+  const dn = ['日','一','二','三','四','五','六'];
+  let h = '';
   cs.forEach(c=>{
-    if(!c.dt.length) return;
-    const t = parseTm(c.tm);
+    if(!c.dt.length){ return; }
+    h += `<div class="gcal-course-block">
+      <div class="gcal-course-name">📚 ${c.name}</div>
+      <div class="gcal-course-meta">🕐 ${c.tm}　👤 ${c.tc}　🏛 ${c.rm}　${c.tp} · ${c.cr}學分</div>
+      <div class="gcal-dates">`;
     c.dt.forEach(dStr=>{
       const dt = pd(dStr);
       if(!dt) return;
-      const summary  = icsEscape('【成大EMBA】'+c.name);
-      const location = icsEscape(c.rm);
-      const desc     = icsEscape('授課教師：'+c.tc+'　屬性：'+c.tp+'　學分：'+c.cr);
-      lines.push('BEGIN:VEVENT');
-      lines.push('UID:'+uid());
-      lines.push('DTSTAMP:'+dtstamp);
-      if(t){
-        lines.push('DTSTART;TZID=Asia/Taipei:'+toICSDate(dt,t.sh,t.sm));
-        lines.push('DTEND;TZID=Asia/Taipei:'+toICSDate(dt,t.eh,t.em));
-      } else {
-        const ymd=dt.getFullYear()+pad(dt.getMonth()+1)+pad(dt.getDate());
-        lines.push('DTSTART;VALUE=DATE:'+ymd);
-        lines.push('DTEND;VALUE=DATE:'+ymd);
-      }
-      lines.push('SUMMARY:'+summary);
-      lines.push('LOCATION:'+location);
-      lines.push('DESCRIPTION:'+desc);
-      lines.push('END:VEVENT');
+      const mo = dt.getMonth()+1;
+      const d  = dt.getDate();
+      const day = dn[dt.getDay()];
+      const url = makeGcalUrl(c, dt);
+      h += `<a class="gcal-btn" href="${url}" target="_blank" rel="noopener">📅 ${mo}/${d}（${day}）</a>`;
     });
+    h += `</div></div>`;
   });
-  lines.push('END:VCALENDAR');
-
-  const content = lines.join('\r\n');
-
-  // ── 產生連結讓用戶自己點（iOS Safari 唯一可靠方式）──
-  const linkBox = document.getElementById('icsLinkBox');
-  const link    = document.getElementById('icsLink');
-
-  try {
-    const blob = new Blob([content], {type:'text/calendar;charset=utf-8'});
-    const url  = URL.createObjectURL(blob);
-    link.href  = url;
-  } catch(e) {
-    link.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(content);
-  }
-
-  link.download = 'NCKU_EMBA_E118_115S1.ics';
-  linkBox.style.display = 'block';
-
-  // 滾動到連結位置
-  linkBox.scrollIntoView({behavior:'smooth', block:'center'});
+  box.innerHTML = h;
 }
 
 // ── Init ─────────────────────────────────────────────────
 document.getElementById('mlb').textContent = MO[cm].lb;
-rCards(); rSum(); rWeek(); rCal(); rLst();
+rCards(); rSum(); rWeek(); rCal(); rLst(); rGcal();
 </script>
 </body>
 </html>
