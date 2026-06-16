@@ -203,11 +203,18 @@ body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:var(-
   <div class="export-bar">
     <button class="btn-ics" id="btnIcs" onclick="exportICS()">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="3" width="14" height="12" rx="2" stroke="white" stroke-width="1.4"/><line x1="5" y1="1" x2="5" y2="5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><line x1="11" y1="1" x2="11" y2="5" stroke="white" stroke-width="1.4" stroke-linecap="round"/><line x1="1" y1="7" x2="15" y2="7" stroke="white" stroke-width="1.2"/><circle cx="5" cy="10" r="1" fill="white"/><circle cx="8" cy="10" r="1" fill="white"/><circle cx="11" cy="10" r="1" fill="white"/></svg>
-      <span class="btn-txt">匯出 .ics 行事曆檔案</span>
+      <span class="btn-txt">產生行事曆檔案</span>
     </button>
-    <div class="ics-note">
-      下載後直接點擊開啟，可匯入 iPhone 行事曆、Google Calendar、Outlook。<br>
-      每一堂課的所有上課日期均會建立為獨立行程，含課程名稱、時間、教室。
+  </div>
+  <div id="icsLinkBox" style="display:none;margin-bottom:28px;">
+    <div style="background:var(--white);border:1px solid var(--divider);border-left:4px solid #2E7D32;border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow);">
+      <div style="font-size:12px;font-weight:700;color:#2E7D32;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">✅ 行事曆檔案已產生</div>
+      <a id="icsLink" href="#" style="display:inline-block;background:#2E7D32;color:white;font-size:14px;font-weight:700;padding:10px 20px;border-radius:var(--r);text-decoration:none;margin-bottom:12px;">⬇️ 點此下載 .ics 檔案</a>
+      <div style="font-size:12px;color:#9A7B78;line-height:1.8;">
+        <b>iPhone</b>：點擊後選「加入行事曆」即完成匯入<br>
+        <b>Android</b>：下載後開啟，選擇以 Google 日曆開啟<br>
+        <b>電腦</b>：下載後雙擊，匯入 Outlook / Google Calendar
+      </div>
     </div>
   </div>
 
@@ -482,11 +489,7 @@ function uid(){ return Math.random().toString(36).slice(2)+Date.now()+'@nckuemba
 
 function exportICS(){
   const cs = CS.filter(c=>sel.has(c.id));
-  if(!cs.length){ alert('請先選擇課程再匯出！'); return; }
-
-  const btn = document.getElementById('btnIcs');
-  btn.disabled = true;
-  btn.querySelector('span.btn-txt').textContent = '產生中…';
+  if(!cs.length){ alert('請先選擇課程再產生！'); return; }
 
   let lines = [
     'BEGIN:VCALENDAR',
@@ -499,7 +502,7 @@ function exportICS(){
   ];
 
   const now = new Date();
-  const dtstamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}Z`;
+  const dtstamp = now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+'T'+pad(now.getHours())+pad(now.getMinutes())+pad(now.getSeconds())+'Z';
 
   cs.forEach(c=>{
     if(!c.dt.length) return;
@@ -507,61 +510,47 @@ function exportICS(){
     c.dt.forEach(dStr=>{
       const dt = pd(dStr);
       if(!dt) return;
-
-      const summary  = icsEscape('【成大EMBA】' + c.name);
+      const summary  = icsEscape('【成大EMBA】'+c.name);
       const location = icsEscape(c.rm);
-      const desc     = icsEscape('授課教師：' + c.tc + '　屬性：' + c.tp + '　學分：' + c.cr);
-
+      const desc     = icsEscape('授課教師：'+c.tc+'　屬性：'+c.tp+'　學分：'+c.cr);
       lines.push('BEGIN:VEVENT');
-      lines.push('UID:' + uid());
-      lines.push('DTSTAMP:' + dtstamp);
-
+      lines.push('UID:'+uid());
+      lines.push('DTSTAMP:'+dtstamp);
       if(t){
-        lines.push('DTSTART;TZID=Asia/Taipei:' + toICSDate(dt, t.sh, t.sm));
-        lines.push('DTEND;TZID=Asia/Taipei:'   + toICSDate(dt, t.eh, t.em));
+        lines.push('DTSTART;TZID=Asia/Taipei:'+toICSDate(dt,t.sh,t.sm));
+        lines.push('DTEND;TZID=Asia/Taipei:'+toICSDate(dt,t.eh,t.em));
       } else {
-        const ymd = dt.getFullYear() + pad(dt.getMonth()+1) + pad(dt.getDate());
-        lines.push('DTSTART;VALUE=DATE:' + ymd);
-        lines.push('DTEND;VALUE=DATE:'   + ymd);
+        const ymd=dt.getFullYear()+pad(dt.getMonth()+1)+pad(dt.getDate());
+        lines.push('DTSTART;VALUE=DATE:'+ymd);
+        lines.push('DTEND;VALUE=DATE:'+ymd);
       }
-      lines.push('SUMMARY:'     + summary);
-      lines.push('LOCATION:'    + location);
-      lines.push('DESCRIPTION:' + desc);
+      lines.push('SUMMARY:'+summary);
+      lines.push('LOCATION:'+location);
+      lines.push('DESCRIPTION:'+desc);
       lines.push('END:VEVENT');
     });
   });
-
   lines.push('END:VCALENDAR');
 
-  // ── 用 data URI 下載，相容 GitHub Pages / 所有瀏覽器 ──
+  const content = lines.join('\r\n');
+
+  // ── 產生連結讓用戶自己點（iOS Safari 唯一可靠方式）──
+  const linkBox = document.getElementById('icsLinkBox');
+  const link    = document.getElementById('icsLink');
+
   try {
-    const content = lines.join('\r\n');
-    // 嘗試 Blob + createObjectURL（現代瀏覽器）
-    const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+    const blob = new Blob([content], {type:'text/calendar;charset=utf-8'});
     const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = 'NCKU_EMBA_E118_115S1.ics';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
+    link.href  = url;
   } catch(e) {
-    // fallback：data URI（Safari / 舊版瀏覽器）
-    const encoded = encodeURIComponent(lines.join('\r\n'));
-    const a = document.createElement('a');
-    a.href     = 'data:text/calendar;charset=utf-8,' + encoded;
-    a.download = 'NCKU_EMBA_E118_115S1.ics';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{ document.body.removeChild(a); }, 300);
+    link.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(content);
   }
 
-  setTimeout(()=>{
-    btn.disabled = false;
-    btn.querySelector('span.btn-txt').textContent = '匯出 .ics 行事曆檔案';
-  }, 400);
+  link.download = 'NCKU_EMBA_E118_115S1.ics';
+  linkBox.style.display = 'block';
+
+  // 滾動到連結位置
+  linkBox.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 // ── Init ─────────────────────────────────────────────────
